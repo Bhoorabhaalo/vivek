@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd capitalguard/frontend && npm install && npm run build",
+  "outputDirectory": "capitalguard/frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

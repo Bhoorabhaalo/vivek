@@ -1,0 +1,11 @@
+{
+  "name": "capitalguard-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd capitalguard/frontend && npm install && npm run build",
+    "dev": "cd capitalguard/frontend && npm run dev",
+    "lint": "cd capitalguard/frontend && npm run lint",
+    "preview": "cd capitalguard/frontend && npm run preview"
+  }
+}

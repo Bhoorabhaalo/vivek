@@ -12,7 +12,8 @@ export const AuditLog: React.FC<AuditLogProps> = ({ state }) => {
     const fetchLogs = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:8000/api/audit/', {
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiBase}/api/audit/`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -31,6 +32,29 @@ export const AuditLog: React.FC<AuditLogProps> = ({ state }) => {
     const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const logsToDisplay = dbLogs.length > 0 ? dbLogs : (state?.logs || []);
+
+  const handleExportCSV = () => {
+    if (!logsToDisplay.length) return;
+    const headers = ["TIMESTAMP", "EVENT_ID", "SOURCE", "TYPE", "DETAILS"];
+    const rows = logsToDisplay.map((l) => [
+      l.time,
+      `EVT-${Math.abs(hashString(l.time + l.inst)).toString(16).substring(0, 6).toUpperCase()}`,
+      "ControlEngine",
+      l.isHedge ? "MITIGATION_HEDGE" : "ROUTINE_EXEC",
+      `${l.side} ${l.notional} ${l.inst} @ ${l.price}`
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `capitalguard_audit_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <div className="flex flex-col gap-6 pb-12">
       <div className="pt-2 pb-4 px-2">
@@ -45,7 +69,12 @@ export const AuditLog: React.FC<AuditLogProps> = ({ state }) => {
       <div className="bg-core-dark border border-outline-variant rounded-xl overflow-hidden shadow-md">
         <div className="flex justify-between items-center px-4 py-3 bg-surface-container border-b border-outline-variant">
           <span className="font-mono text-xs text-on-surface-variant uppercase tracking-widest">Global Audit Trail</span>
-          <button className="text-[10px] font-mono text-primary border border-primary/30 px-2 py-1 rounded hover:bg-primary/10 transition-colors">EXPORT CSV</button>
+          <button 
+            onClick={handleExportCSV}
+            className="text-[10px] font-mono text-primary border border-primary/30 px-2 py-1 rounded hover:bg-primary/10 transition-colors"
+          >
+            EXPORT CSV
+          </button>
         </div>
         
         <div className="overflow-x-auto">
@@ -61,7 +90,7 @@ export const AuditLog: React.FC<AuditLogProps> = ({ state }) => {
               </tr>
             </thead>
             <tbody>
-              {dbLogs.map((log, i) => (
+              {logsToDisplay.map((log, i) => (
                 <tr key={i} className="border-b border-surface-container hover:bg-surface-container/50 transition-colors text-on-surface">
                   <td className="px-4 py-3 text-on-surface-variant">{log.time}</td>
                   <td className="px-4 py-3 text-primary">EVT-{Math.abs(hashString(log.time + log.inst)).toString(16).substring(0, 6).toUpperCase()}</td>
