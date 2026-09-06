@@ -1,0 +1,17 @@
+fastapi[all]
+pydantic>=2.0
+uvicorn
+sqlalchemy
+alembic
+psycopg2-binary
+pandas
+numpy
+scipy
+cvxpy
+statsmodels
+anthropic
+pytest
+httpx
+websockets
+
+bcrypt<4.1.0

@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply bg-surface-obsidian text-on-surface antialiased;
+    /* Hide scrollbars globally as per prompt */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  html::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Apply dark mode by default if not set on html tag */
+  :root {
+    color-scheme: dark;
+  }
+}
