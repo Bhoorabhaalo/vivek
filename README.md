@@ -12,7 +12,7 @@
 
 ---
 
-## 📌 Executive Overview
+## Executive Overview
 
 **CapitalGuard** is an institutional-grade, real-time risk intelligence and autonomous portfolio defense platform. Designed for treasury desks, asset managers, and quantitative funds, CapitalGuard bridges heavy quantitative risk modeling (Historical/Parametric VaR, CVaR, Factor Betas), convex portfolio optimization (Markowitz Mean-Variance with Ledoit-Wolf shrinkage via `cvxpy`), deterministic policy enforcement (4-tier circuit breakers), and AI-driven decision explainability (powered by Anthropic Claude).
 
@@ -20,14 +20,14 @@ CapitalGuard continuously evaluates portfolio drift, computes tail risk under su
 
 ---
 
-## 🚀 Key Features & Capabilities
+## Key Features & Capabilities
 
-### 1. ⚡ Live Market Simulation & Asynchronous Streaming
+### 1. Live Market Simulation & Asynchronous Streaming
 - **Sub-Second Tick Processing**: Replays synthetic and historical market ticks across multi-asset portfolios (Equities, Treasuries, Corporate Bonds, Cash).
 - **ProcessPoolExecutor Offloading**: Computationally intensive risk evaluations and quadratic optimization problems are offloaded to background worker processes to guarantee non-blocking WebSocket I/O.
 - **Bi-Directional WebSocket Protocol**: Streams portfolio state, expected frontier changes, execution logs, and automated actions in real-time (`/ws/live`).
 
-### 2. 📊 Quantitative Risk Engine
+### 2. Quantitative Risk Engine
 - **Value at Risk (VaR)**: Computes 95% and 99% VaR using both Historical Simulation and Parametric Variance-Covariance methods.
 - **Conditional VaR (CVaR / Expected Shortfall)**: Quantifies severe tail risk beyond the VaR threshold.
 - **Component VaR Breakdown**: Decomposes total portfolio risk across individual asset classes (Equities, Fixed Income, Corporate Bonds, Alternatives).
@@ -35,7 +35,7 @@ CapitalGuard continuously evaluates portfolio drift, computes tail risk under su
 - **Liquidity Scoring**: Multi-tier weighted scoring measuring liquidation feasibility across 5 asset tiers.
 - **Peak-to-Trough Drawdown & Rolling Volatility**: Annualized standard deviation and historical drawdown metrics.
 
-### 3. 🎯 Convex Portfolio Optimization
+### 3. Convex Portfolio Optimization
 - **Markowitz Mean-Variance Formulation**: Real-time optimal allocation maximizing the Sharpe ratio.
 - **Ledoit-Wolf Covariance Shrinkage**: Robust sample covariance estimation against small-sample noise.
 - **Realistic Execution Constraints**:
@@ -45,25 +45,25 @@ CapitalGuard continuously evaluates portfolio drift, computes tail risk under su
   - Gross leverage and liquidity coverage constraints
   - Turnover caps and L1 penalty ($\kappa \sum |w_i - w_{i, \text{old}}|$) to minimize slippage and trading costs.
 
-### 4. 🛑 Deterministic Control Engine & Circuit Breakers
+### 4. Deterministic Control Engine & Circuit Breakers
 Multi-tier risk governance rules trigger automated interventions:
 - **Tier 1 (Watch)**: Metric drift alert and telemetry monitoring.
 - **Tier 2 (Warn)**: Pre-breach alert with parameter re-balancing warnings.
 - **Tier 3 (Auto-Act)**: Autonomous defensive hedging execution (e.g., algorithmic buy order in 10Y US Treasuries via VWAP/TWAP).
 - **Tier 4 (Halt)**: Automated portfolio-wide circuit breaker halting automated actions during multi-metric systemic crises.
 
-### 5. 🧠 AI Decision Explainability (Claude 3.5 Sonnet)
+### 5. AI Decision Explainability (Claude 3.5 Sonnet)
 - Natural language audit narratives translating quantitative metrics and algorithmic interventions into clear executive briefings for CFOs and Risk Committees.
 - Explains the *why*, the *threat context*, and *next steps* for every automated decision.
 - Built-in fallback to deterministic simulated narratives when offline or without an API key.
 
-### 6. 🧪 Scenario Lab (Stress-Testing)
+### 6. Scenario Lab (Stress-Testing)
 Simulate catastrophic macro conditions against the active portfolio with instant re-calculation:
 - **2008 Financial Crisis Replay**: Systemic equity collapse and cross-asset correlation breakdown ($-\$45.2\text{M}$ VaR shock).
 - **COVID-19 March 2020 Liquidity Shock**: Rapid liquidity vacuum and flight to cash ($-\$32.1\text{M}$ VaR shock).
 - **Unanchored Inflation Spike**: Sudden +300bps yield curve shock and stagflationary pressures ($-\$28.5\text{M}$ VaR shock).
 
-### 7. 📜 Cryptographic Audit Ledger & RBAC
+### 7. Cryptographic Audit Ledger & RBAC
 - **Audit Log Persistence**: Complete record of all algorithmic trades, order latencies, execution prices, and policy events stored in SQLite/PostgreSQL.
 - **Role-Based Access Control (RBAC)**: JWT authentication distinguishing `APPROVER` (Admin with scenario execution and policy control) and `VIEWER` (Read-only access).
 
@@ -253,7 +253,7 @@ vivek/
 
 ---
 
-## 🚀 Deploying to Vercel
+## Deploying to Vercel
 
 The project is pre-configured for one-click deployment to **Vercel**:
 
@@ -282,11 +282,11 @@ If you have deployed the FastAPI backend (e.g. on Railway, Render, Fly.io, or AW
 - `VITE_API_BASE_URL`: e.g. `https://capitalguard-api.up.railway.app`
 - `VITE_WS_BASE_URL`: e.g. `wss://capitalguard-api.up.railway.app`
 
-> 💡 **Built-in Offline / Preview Mode**: If no backend environment variables are supplied, the Vercel deployment operates in an interactive simulated demo mode with instant one-click login, synthetic ticks, live metrics, scenario shocks, and automated hedging.
+> **Built-in Offline / Preview Mode**: If no backend environment variables are supplied, the Vercel deployment operates in an interactive simulated demo mode with instant one-click login, synthetic ticks, live metrics, scenario shocks, and automated hedging.
 
 ---
 
-## 🔐 Authentication & Demo Credentials
+## Authentication & Demo Credentials
 
 CapitalGuard includes pre-configured demo users for quick evaluation:
 
@@ -299,7 +299,7 @@ CapitalGuard includes pre-configured demo users for quick evaluation:
 
 ---
 
-## 📡 API & WebSocket Specification
+## API & WebSocket Specification
 
 ### REST Endpoints
 - `GET /health` — Health check endpoint reporting engine status.
@@ -334,7 +334,7 @@ Streams continuous state updates every 2 seconds:
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 To run the backend test suite:
 ```bash
@@ -351,7 +351,7 @@ The test suite covers:
 
 ---
 
-## 🧰 Tech Stack Summary
+## Tech Stack Summary
 
 - **Backend**: Python 3, FastAPI, Uvicorn, SQLAlchemy, Alembic, SQLite / PostgreSQL.
 - **Quantitative & Math**: NumPy, SciPy, Pandas, CVXPY, Statsmodels.
