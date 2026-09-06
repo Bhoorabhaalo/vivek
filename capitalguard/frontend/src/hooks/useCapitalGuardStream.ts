@@ -34,6 +34,11 @@ export interface LiveState {
     impactDrawdown: string;
   } | null;
   component_var: Record<string, number>;
+  var_backtest?: {
+    exceedances: number;
+    expected: number;
+    pass: boolean;
+  };
 }
 
 const getInitialState = (): LiveState => ({
@@ -51,6 +56,11 @@ const getInitialState = (): LiveState => ({
   },
   leverage: { gross: 1.2, lcr: 118 },
   frontier: { expected_return: 8.5, volatility: 12.0 },
+  var_backtest: {
+    exceedances: 2,
+    expected: 2.5,
+    pass: true
+  },
   logs: [
     {
       time: new Date().toISOString().substring(11, 23),
@@ -191,6 +201,11 @@ export const useCapitalGuardStream = (token: string | null) => {
             Status: 'HEDGED'
           }
         },
+        var_backtest: {
+          exceedances: 8,
+          expected: 2.5,
+          pass: false
+        },
         logs: [
           {
             time: new Date().toISOString().substring(11, 23),
@@ -213,6 +228,11 @@ export const useCapitalGuardStream = (token: string | null) => {
         drawdown: -0.5,
         var_99: -12100000.0,
         automated_action: null,
+        var_backtest: {
+          exceedances: 2,
+          expected: 2.5,
+          pass: true
+        },
         logs: prev.logs.filter((l) => !l.isHedge)
       }));
     }

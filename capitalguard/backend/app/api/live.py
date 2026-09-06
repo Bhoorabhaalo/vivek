@@ -32,7 +32,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = None):
                     elif cmd == "calm":
                         coordinator.set_demo_state("calm")
                     elif cmd == "run_scenario":
-                        await coordinator.run_scenario(payload.get("scenario_id"))
+                        await coordinator.run_scenario(
+                            payload.get("scenario_id"),
+                            params=payload.get("params")
+                        )
             except json.JSONDecodeError:
                 # Fallback to plain text logic for backward compatibility
                 if data == "shock":

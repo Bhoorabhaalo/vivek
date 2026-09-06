@@ -1,11 +1,18 @@
 import React from 'react';
 import type { LiveState } from '../hooks/useCapitalGuardStream';
+import { ShieldCheck, ShieldAlert } from 'lucide-react';
 
 interface RiskCockpitProps {
   state: LiveState;
 }
 
 export const RiskCockpit: React.FC<RiskCockpitProps> = ({ state }) => {
+  const backtest = state.var_backtest || {
+    exceedances: 2,
+    expected: 2.5,
+    pass: true
+  };
+
   return (
     <div className="flex flex-col gap-6 pb-12">
       <div className="pt-2 pb-4 px-2">
@@ -15,6 +22,55 @@ export const RiskCockpit: React.FC<RiskCockpitProps> = ({ state }) => {
         <p className="font-sans text-on-surface-variant text-sm tracking-wide max-w-2xl mt-2">
           Deep-dive analytics into portfolio tail risk, factor exposure, and stress conditions.
         </p>
+      </div>
+
+      {/* Model Validation Badge/Card (Kupiec POF Backtest) */}
+      <div className="bg-core-dark rounded-xl border border-outline-variant p-5 shadow-md flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className={`p-2.5 rounded-lg border ${
+            backtest.pass 
+              ? 'bg-primary/10 border-primary/30 text-primary' 
+              : 'bg-danger/10 border-danger/30 text-danger animate-pulse'
+          }`}>
+            {backtest.pass ? <ShieldCheck size={22} /> : <ShieldAlert size={22} />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-sans text-sm font-bold text-on-surface uppercase tracking-wider">
+                Model Validation
+              </h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/60">
+                KUPIEC POF TEST
+              </span>
+            </div>
+            <p className="font-sans text-xs text-on-surface-variant mt-1">
+              99% VaR exception rate evaluated over trailing 250 ticks (expected failure rate: 1.0%)
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">Exceedances</span>
+            <div className="font-mono text-sm mt-0.5">
+              <span className={`font-bold ${backtest.pass ? 'text-primary' : 'text-danger'}`}>
+                {backtest.exceedances}
+              </span>
+              <span className="text-on-surface-variant text-xs"> / {backtest.expected} expected</span>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 border shadow-sm ${
+              backtest.pass 
+                ? 'bg-primary/15 text-primary border-primary/40' 
+                : 'bg-danger/20 text-danger border-danger/50'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${backtest.pass ? 'bg-primary' : 'bg-danger'}`} />
+              {backtest.pass ? 'PASS' : 'FAIL'}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

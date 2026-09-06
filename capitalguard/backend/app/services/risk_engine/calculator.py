@@ -178,7 +178,16 @@ class RiskCalculator:
                 bench_returns, join='inner')
             report["beta"] = self.calculate_beta(aligned_port, aligned_bench)
 
+        from app.services.risk_engine.backtest import kupiec_backtester
+        report["var_backtest"] = kupiec_backtester.evaluate_portfolio(positions, history, window=250)
+
         return report
+
+    def backtest_var_kupiec(
+            self, positions: List[AssetPosition], history: pd.DataFrame, window: int = 250) -> Dict[str, Any]:
+        from app.services.risk_engine.backtest import kupiec_backtester
+        return kupiec_backtester.evaluate_portfolio(positions, history, window=window)
 
 
 risk_calculator = RiskCalculator()
+

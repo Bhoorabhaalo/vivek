@@ -34,6 +34,7 @@ CapitalGuard continuously evaluates portfolio drift, computes tail risk under su
 - **Factor Sensitivity & Beta**: Continuous tracking of Market Beta, Interest Rate Beta, Credit Spread Beta, and Liquidity Beta.
 - **Liquidity Scoring**: Multi-tier weighted scoring measuring liquidation feasibility across 5 asset tiers.
 - **Peak-to-Trough Drawdown & Rolling Volatility**: Annualized standard deviation and historical drawdown metrics.
+- **Kupiec POF VaR Backtesting**: Continuous statistical validation comparing 99% VaR exceedances over the trailing 250 ticks against the 1.0% expected failure rate using the Kupiec Proportion-of-Failures likelihood ratio test (`var_backtest: {exceedances, expected, pass}`).
 
 ### 3. 🎯 Convex Portfolio Optimization
 - **Markowitz Mean-Variance Formulation**: Real-time optimal allocation maximizing the Sharpe ratio.

@@ -99,14 +99,19 @@ class EngineCoordinator:
             "automated_action": None,
             "demo_state": "calm",
             "scenario_result": None,
-            "component_var": {}
+            "component_var": {},
+            "var_backtest": {
+                "exceedances": 2,
+                "expected": 2.5,
+                "pass": True
+            }
         }
         self.clients = set()
         self.history = pd.DataFrame()
 
     def start(self):
         assets = [p.asset_id for p in self.portfolio]
-        self.history = feeder.generate_synthetic_history(assets, days=100)
+        self.history = feeder.generate_synthetic_history(assets, days=250)
         feeder.add_subscriber(self.on_tick)
         asyncio.create_task(
             feeder.run_replay(
@@ -125,8 +130,8 @@ class EngineCoordinator:
             new_row = pd.DataFrame([prices])
             self.history = pd.concat(
                 [self.history, new_row], ignore_index=True)
-            if len(self.history) > 100:
-                self.history = self.history.iloc[1:]
+            if len(self.history) > 250:
+                self.history = self.history.iloc[-250:]
 
             loop = asyncio.get_running_loop()
 
@@ -146,6 +151,8 @@ class EngineCoordinator:
 
             self.state["var_99"] = risk_report.get("var_99_hist", 0) * aum
             self.state["component_var"] = {}
+            if "var_backtest" in risk_report:
+                self.state["var_backtest"] = risk_report["var_backtest"]
 
             asset_values = {}
             for p in self.portfolio:
@@ -243,23 +250,69 @@ class EngineCoordinator:
     def set_demo_state(self, state: str):
         self.state["demo_state"] = state
 
-    async def run_scenario(self, scenario_id: str):
+    async def run_scenario(self, scenario_id: str, params: dict = None):
         try:
-            scenario_mapping = {
-                "2008_crash": "equity_crash",
-                "covid_shock": "liquidity_freeze",
-                "inflation_spike": "rate_shock"
-            }
-            backend_id = scenario_mapping.get(scenario_id, scenario_id)
-            res = scenario_lab.run_scenario(
-                backend_id, self.portfolio, self.history)
-            
-            dollar_var = res['shocked_value'] * res['shocked_metrics'].get('var_99_hist', 0)
-            
+            if scenario_id == "custom" and params:
+                from app.services.scenario_lab.stress_test import (
+                    EquityCrashScenario,
+                    InterestRateShockScenario,
+                    CreditSpreadWideningScenario,
+                )
+                import copy
+
+                equity_pct = float(params.get("equity_pct", 0)) / 100.0
+                rate_bps = float(params.get("rate_bps", 0))
+                credit_bps = float(params.get("credit_bps", 0))
+
+                # Apply all three shocks sequentially using existing scenario math
+                shocked_positions = copy.deepcopy(self.portfolio)
+                shocked_history = self.history.copy()
+
+                if equity_pct != 0:
+                    eq_scenario = EquityCrashScenario(shock_pct=equity_pct)
+                    shocked_positions, shocked_history = eq_scenario.apply(
+                        shocked_positions, shocked_history
+                    )
+                if rate_bps != 0:
+                    rate_scenario = InterestRateShockScenario(bps_shift=rate_bps)
+                    shocked_positions, shocked_history = rate_scenario.apply(
+                        shocked_positions, shocked_history
+                    )
+                if credit_bps != 0:
+                    credit_scenario = CreditSpreadWideningScenario(spread_bps=credit_bps)
+                    shocked_positions, shocked_history = credit_scenario.apply(
+                        shocked_positions, shocked_history
+                    )
+
+                from app.services.risk_engine.calculator import risk_calculator
+                baseline_value = sum(p.quantity * p.cost_basis for p in self.portfolio)
+                shocked_value = sum(p.quantity * p.cost_basis for p in shocked_positions)
+                shocked_metrics = risk_calculator.generate_full_risk_report(
+                    shocked_positions, shocked_history
+                )
+                impact_pct = (
+                    (shocked_value - baseline_value) / baseline_value
+                    if baseline_value > 0 else 0
+                )
+                dollar_var = shocked_value * shocked_metrics.get("var_99_hist", 0)
+                res_id = "custom"
+            else:
+                scenario_mapping = {
+                    "2008_crash": "equity_crash",
+                    "covid_shock": "liquidity_freeze",
+                    "inflation_spike": "rate_shock",
+                }
+                backend_id = scenario_mapping.get(scenario_id, scenario_id)
+                res = scenario_lab.run_scenario(backend_id, self.portfolio, self.history)
+                impact_pct = res["impact_pct"]
+                shocked_value = res["shocked_value"]
+                dollar_var = shocked_value * res["shocked_metrics"].get("var_99_hist", 0)
+                res_id = scenario_id
+
             self.state["scenario_result"] = {
-                "id": scenario_id,
+                "id": res_id,
                 "impactVaR": f"${dollar_var / 1e6:.2f}M",
-                "impactDrawdown": f"{res['impact_pct'] * 100:.2f}%"
+                "impactDrawdown": f"{impact_pct * 100:.2f}%",
             }
             await self.broadcast()
         except Exception as e:
