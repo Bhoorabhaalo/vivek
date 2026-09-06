@@ -133,6 +133,23 @@ class RiskCalculator:
             return float('inf')
         return float(liquid_assets / projected_outflows)
 
+    def _compute_raroc(self, port_returns: pd.Series, var_99: float) -> float:
+        """Risk-Adjusted Return on Capital: annualised expected return / |VaR_99|.
+
+        VaR_99 is expressed as a negative fraction (e.g. -0.012). The
+        denominator uses its absolute value so RAROC is positive when
+        the portfolio earns a positive expected return.
+        """
+        if port_returns.empty:
+            return 0.0
+        expected_return_annual = float(port_returns.mean() * 252)
+        denom = abs(var_99)
+        if denom == 0.0:
+            return 0.0
+        return round(expected_return_annual / denom, 4)
+
+
+
     def generate_full_risk_report(
             self, positions: List[AssetPosition], history: pd.DataFrame, benchmark_history: pd.Series = None) -> Dict[str, float]:
         """Runs all risk metrics based on current positions and history"""
@@ -156,9 +173,11 @@ class RiskCalculator:
 
         port_returns = self._get_portfolio_returns(weights, returns)
 
+        var_99 = self.calculate_var_historical(port_returns, 0.99)
+
         report = {
             "var_95_hist": self.calculate_var_historical(port_returns, 0.95),
-            "var_99_hist": self.calculate_var_historical(port_returns, 0.99),
+            "var_99_hist": var_99,
             "var_95_param": self.calculate_var_parametric(port_returns, 0.95),
             "cvar_95": self.calculate_cvar(port_returns, 0.95),
             "vol_30d": self.calculate_volatility(port_returns, 30),
@@ -168,7 +187,8 @@ class RiskCalculator:
             "hhi": self.calculate_hhi(positions),
             "sharpe_ratio": self.calculate_sharpe_ratio(port_returns),
             "sortino_ratio": self.calculate_sortino_ratio(port_returns),
-            "lcr": self.calculate_lcr(positions)
+            "lcr": self.calculate_lcr(positions),
+            "raroc": self._compute_raroc(port_returns, var_99),
         }
 
         if benchmark_history is not None and not benchmark_history.empty:

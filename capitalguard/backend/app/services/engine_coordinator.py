@@ -84,6 +84,7 @@ class EngineCoordinator:
             "aum": 0.0,
             "var_99": -12100000.0,
             "sharpe": 1.84,
+            "raroc": 1.42,
             "utilization": 82.4,
             "beta": 0.85,
             "drawdown": -0.5,
@@ -153,6 +154,8 @@ class EngineCoordinator:
             self.state["component_var"] = {}
             if "var_backtest" in risk_report:
                 self.state["var_backtest"] = risk_report["var_backtest"]
+            if "raroc" in risk_report:
+                self.state["raroc"] = risk_report["raroc"]
 
             asset_values = {}
             for p in self.portfolio:

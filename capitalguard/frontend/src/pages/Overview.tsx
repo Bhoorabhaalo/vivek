@@ -4,7 +4,7 @@ import { PolicyPanel } from '../components/PolicyPanel';
 import { FrontierChart } from '../components/FrontierChart';
 import { ExecutionLog } from '../components/ExecutionLog';
 import { ExplainabilityPanel } from '../components/ExplainabilityPanel';
-import { Briefcase, Activity, TrendingUp, DollarSign, ShieldAlert } from 'lucide-react';
+import { Briefcase, Activity, TrendingUp, DollarSign, ShieldAlert, BarChart2 } from 'lucide-react';
 import type { LiveState } from '../hooks/useCapitalGuardStream';
 
 interface OverviewProps {
@@ -36,7 +36,7 @@ export const Overview: React.FC<OverviewProps> = ({ state }) => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 relative z-10">
         <KPICard 
           label="Total Managed Capital" 
           value={formatCurrency(state.aum)} 
@@ -58,6 +58,13 @@ export const Overview: React.FC<OverviewProps> = ({ state }) => {
           icon={TrendingUp} 
           delta="+0.1" 
           deltaType="positive"
+        />
+        <KPICard
+          label="RAROC"
+          value={state.raroc.toFixed(2) + '×'}
+          icon={BarChart2}
+          delta={state.raroc >= 1 ? 'Above Hurdle' : 'Below Hurdle'}
+          deltaType={state.raroc >= 1 ? 'positive' : 'negative'}
         />
         <KPICard 
           label="Capital Utilization" 

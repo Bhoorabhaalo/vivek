@@ -4,6 +4,7 @@ export interface LiveState {
   aum: number;
   var_99: number;
   sharpe: number;
+  raroc: number;
   utilization: number;
   beta: number;
   drawdown: number;
@@ -45,6 +46,7 @@ const getInitialState = (): LiveState => ({
   aum: 62500000.0,
   var_99: -12100000.0,
   sharpe: 1.84,
+  raroc: 1.42,
   utilization: 82.4,
   beta: 0.85,
   drawdown: -0.5,
